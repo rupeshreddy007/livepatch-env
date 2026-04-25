@@ -1,0 +1,32 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.backends._legacy:_Backend"
+
+[project]
+name = "livepatch-env"
+version = "0.1.0"
+description = "LivePatch: RL environment for database incident response under live traffic"
+requires-python = ">=3.10"
+dependencies = [
+    "flask>=3.0",
+    "numpy>=1.24",
+    "pyyaml>=6.0",
+    "gunicorn>=21.2",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0",
+    "openai>=1.0",
+]
+train = [
+    "trl>=0.12",
+    "transformers>=4.45",
+    "torch>=2.1",
+    "unsloth",
+    "datasets",
+    "matplotlib",
+]
+
+[tool.setuptools.packages.find]
+include = ["src*", "server*"]

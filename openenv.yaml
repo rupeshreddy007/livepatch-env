@@ -1,0 +1,74 @@
+spec_version: 1
+name: livepatch
+description: >
+  LivePatch: RL environment for database incident response under live traffic.
+  The agent must diagnose and fix PostgreSQL issues using psql commands
+  while maintaining uptime. Unsafe operations cause real downtime.
+type: space
+runtime: flask
+app: server.app:app
+port: 7860
+
+tasks:
+  - name: easy
+    description: "Single fault, low traffic (50 rps). Learn basic diagnosis and fixing."
+    difficulty: easy
+
+  - name: medium
+    description: "Two faults, moderate traffic (100 rps). Must triage and fix without downtime."
+    difficulty: medium
+
+  - name: hard
+    description: "Three faults, high traffic (200 rps). Compound incidents with ordering dependencies."
+    difficulty: hard
+
+  - name: expert
+    description: "Four faults, extreme traffic (500 rps). Multi-fault cascading failures."
+    difficulty: expert
+
+actions:
+  - name: command
+    type: text
+    description: "A psql command to execute against the production database"
+    examples:
+      - "\\dt"
+      - "\\di"
+      - "\\d orders"
+      - "EXPLAIN ANALYZE SELECT * FROM orders WHERE user_id = 1"
+      - "SELECT * FROM pg_stat_activity"
+      - "SELECT * FROM pg_locks"
+      - "CREATE INDEX CONCURRENTLY idx_name ON table(col)"
+      - "SELECT pg_terminate_backend(1234)"
+      - "ALTER SYSTEM SET work_mem = '256MB'"
+      - "SELECT pg_reload_conf()"
+      - "VACUUM ANALYZE orders"
+      - "submit"
+
+observation:
+  type: text
+  description: "psql command output + live traffic metrics (requests OK/failed, latency)"
+
+reward:
+  type: float
+  description: >
+    Multi-signal reward from PostgreSQL system catalogs (no LLM judge):
+    - EXPLAIN ANALYZE cost improvement (before vs after)
+    - Traffic uptime (fraction of successful requests)
+    - Efficiency (steps saved)
+    - Safety bonus (used CONCURRENTLY instead of blocking operations)
+    - Downtime penalty (failed requests during unsafe ops)
+
+grading:
+  weights:
+    fix_quality: 0.35
+    uptime: 0.30
+    efficiency: 0.20
+    safety: 0.15
+
+tags:
+  - openenv
+  - database
+  - incident-response
+  - postgresql
+  - sre
+  - live-traffic
