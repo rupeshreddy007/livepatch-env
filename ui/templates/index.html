@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LivePatch — Database Incident Response</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Courier New', monospace; background: #0a0a0a; color: #e0e0e0; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+        h1 { color: #ff6b6b; margin-bottom: 5px; font-size: 1.4em; }
+        .subtitle { color: #888; margin-bottom: 20px; font-size: 0.9em; }
+        .grid { display: grid; grid-template-columns: 1fr 350px; gap: 20px; }
+        .panel { background: #1a1a1a; border: 1px solid #333; border-radius: 8px; padding: 16px; }
+        .panel h2 { color: #4ecdc4; font-size: 1em; margin-bottom: 10px; border-bottom: 1px solid #333; padding-bottom: 8px; }
+        #terminal { background: #0d1117; border: 1px solid #30363d; border-radius: 6px; padding: 12px; height: 400px; overflow-y: auto; font-size: 13px; white-space: pre-wrap; line-height: 1.5; }
+        .cmd-input { display: flex; gap: 8px; margin-top: 10px; }
+        .cmd-input input { flex: 1; background: #0d1117; border: 1px solid #30363d; color: #c9d1d9; padding: 8px 12px; border-radius: 4px; font-family: inherit; font-size: 13px; }
+        .cmd-input button { background: #238636; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; font-family: inherit; }
+        .cmd-input button:hover { background: #2ea043; }
+        .controls { display: flex; gap: 8px; margin-bottom: 15px; }
+        .controls select, .controls button { background: #21262d; color: #c9d1d9; border: 1px solid #30363d; padding: 6px 12px; border-radius: 4px; font-family: inherit; cursor: pointer; }
+        .metric { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid #1e1e1e; }
+        .metric-label { color: #888; }
+        .metric-value { font-weight: bold; }
+        .metric-value.good { color: #3fb950; }
+        .metric-value.bad { color: #f85149; }
+        .metric-value.warn { color: #d29922; }
+        .traffic-bar { height: 8px; background: #21262d; border-radius: 4px; margin-top: 4px; overflow: hidden; }
+        .traffic-bar .fill { height: 100%; border-radius: 4px; transition: width 0.3s; }
+        .alert { padding: 10px; border-radius: 4px; margin-bottom: 10px; font-size: 12px; }
+        .alert-red { background: #3d1515; border: 1px solid #f85149; color: #f85149; }
+        .alert-green { background: #153d1f; border: 1px solid #3fb950; color: #3fb950; }
+        .prompt { color: #4ecdc4; }
+        .output { color: #c9d1d9; }
+        .error { color: #f85149; }
+        .reward-pos { color: #3fb950; }
+        .reward-neg { color: #f85149; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 LivePatch — Fix It Without Breaking It</h1>
+        <p class="subtitle">Production database incident response under live traffic</p>
+        <div class="controls">
+            <select id="difficulty">
+                <option value="easy">Easy (1 fault, 50 rps)</option>
+                <option value="medium" selected>Medium (2 faults, 100 rps)</option>
+                <option value="hard">Hard (3 faults, 200 rps)</option>
+                <option value="expert">Expert (4 faults, 500 rps)</option>
+            </select>
+            <button onclick="resetEnv()">New Incident</button>
+        </div>
+        <div class="grid">
+            <div class="panel">
+                <h2>psql terminal</h2>
+                <div id="terminal"></div>
+                <div class="cmd-input">
+                    <input type="text" id="cmdInput" placeholder="Enter psql command..." onkeydown="if(event.key==='Enter')sendCmd()">
+                    <button onclick="sendCmd()">Execute</button>
+                </div>
+            </div>
+            <div>
+                <div class="panel" style="margin-bottom:15px">
+                    <h2>📊 Live Traffic</h2>
+                    <div id="trafficAlert" class="alert alert-red">Waiting for incident...</div>
+                    <div class="metric"><span class="metric-label">Requests OK</span><span id="reqOk" class="metric-value good">-</span></div>
+                    <div class="metric"><span class="metric-label">Requests Failed</span><span id="reqFail" class="metric-value bad">-</span></div>
+                    <div class="metric"><span class="metric-label">Avg Latency</span><span id="avgLat" class="metric-value">-</span></div>
+                    <div class="metric"><span class="metric-label">p99 Latency</span><span id="p99Lat" class="metric-value">-</span></div>
+                    <div class="traffic-bar"><div id="uptimeBar" class="fill" style="width:0%;background:#3fb950"></div></div>
+                </div>
+                <div class="panel">
+                    <h2>📈 Episode</h2>
+                    <div class="metric"><span class="metric-label">Step</span><span id="stepCount" class="metric-value">0/25</span></div>
+                    <div class="metric"><span class="metric-label">Total Reward</span><span id="totalReward" class="metric-value">0.00</span></div>
+                    <div class="metric"><span class="metric-label">Unsafe Ops</span><span id="unsafeOps" class="metric-value good">0</span></div>
+                    <div class="metric"><span class="metric-label">Safe Ops</span><span id="safeOps" class="metric-value">0</span></div>
+                    <div class="metric"><span class="metric-label">Faults Resolved</span><span id="faultsResolved" class="metric-value">-</span></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        const term = document.getElementById('terminal');
+        function appendTerm(text, cls='output') {
+            const span = document.createElement('span');
+            span.className = cls;
+            span.textContent = text + '\n';
+            term.appendChild(span);
+            term.scrollTop = term.scrollHeight;
+        }
+        function updateMetrics(obs) {
+            const t = obs.traffic || {};
+            document.getElementById('reqOk').textContent = t.requests_ok || 0;
+            document.getElementById('reqFail').textContent = t.requests_failed || 0;
+            document.getElementById('avgLat').textContent = (t.avg_latency_ms || 0).toFixed(1) + 'ms';
+            const p99 = t.p99_latency_ms || 0;
+            const p99El = document.getElementById('p99Lat');
+            p99El.textContent = p99.toFixed(1) + 'ms';
+            p99El.className = 'metric-value ' + (p99 < 200 ? 'good' : p99 < 1000 ? 'warn' : 'bad');
+            const total = (t.requests_ok||0) + (t.requests_failed||0);
+            const uptime = total > 0 ? (t.requests_ok||0)/total*100 : 0;
+            document.getElementById('uptimeBar').style.width = uptime + '%';
+            document.getElementById('uptimeBar').style.background = uptime > 95 ? '#3fb950' : uptime > 80 ? '#d29922' : '#f85149';
+            const alert = document.getElementById('trafficAlert');
+            if (t.requests_failed > 0) { alert.className='alert alert-red'; alert.textContent=`⚠️ ${t.requests_failed} failed requests this step`; }
+            else { alert.className='alert alert-green'; alert.textContent='✅ All requests healthy'; }
+            document.getElementById('stepCount').textContent = `${obs.step}/${obs.max_steps}`;
+            const rw = obs.total_reward || 0;
+            const rwEl = document.getElementById('totalReward');
+            rwEl.textContent = rw.toFixed(2);
+            rwEl.className = 'metric-value ' + (rw >= 0 ? 'good' : 'bad');
+        }
+        async function resetEnv() {
+            const diff = document.getElementById('difficulty').value;
+            term.innerHTML = '';
+            const res = await fetch('/api/reset', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({difficulty:diff})});
+            const obs = await res.json();
+            appendTerm(obs.observation);
+            updateMetrics(obs);
+            // Reset state panel
+            document.getElementById('unsafeOps').textContent = '0';
+            document.getElementById('safeOps').textContent = '0';
+            document.getElementById('faultsResolved').textContent = '-';
+            document.getElementById('cmdInput').focus();
+        }
+        async function sendCmd() {
+            const input = document.getElementById('cmdInput');
+            const cmd = input.value.trim();
+            if (!cmd) return;
+            input.value = '';
+            appendTerm('psql> ' + cmd, 'prompt');
+            const res = await fetch('/api/step', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({command:cmd})});
+            const obs = await res.json();
+            appendTerm(obs.observation);
+            const rw = obs.reward || 0;
+            if (rw !== 0) appendTerm(`[reward: ${rw >= 0 ? '+' : ''}${rw.toFixed(3)}]`, rw >= 0 ? 'reward-pos' : 'reward-neg');
+            updateMetrics(obs);
+            // Fetch full state for sidebar
+            const stRes = await fetch('/api/state');
+            const st = await stRes.json();
+            document.getElementById('unsafeOps').textContent = st.unsafe_ops || 0;
+            document.getElementById('unsafeOps').className = 'metric-value ' + (st.unsafe_ops > 0 ? 'bad' : 'good');
+            document.getElementById('safeOps').textContent = st.safe_ops || 0;
+            const fr = st.faults_resolved || [];
+            const fi = st.faults_injected || [];
+            document.getElementById('faultsResolved').textContent = `${fr.length}/${fi.length}`;
+            document.getElementById('faultsResolved').className = 'metric-value ' + (fr.length === fi.length && fi.length > 0 ? 'good' : 'warn');
+            if (obs.done) appendTerm('\n--- EPISODE COMPLETE ---', 'prompt');
+            input.focus();
+        }
+        resetEnv();
+    </script>
+</body>
+</html>
