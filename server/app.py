@@ -67,160 +67,196 @@ def index():
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>LivePatch - PostgreSQL Incident Response</title>
+<title>LivePatch - PostgreSQL Incident Response Environment</title>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
-  body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; background: #0f172a; color: #e2e8f0; min-height: 100vh; }
-  .hero { background: linear-gradient(135deg, #1e293b 0%, #0f172a 50%, #1a1a2e 100%); padding: 60px 20px 40px; text-align: center; border-bottom: 1px solid #334155; }
-  .hero h1 { font-size: 2.5rem; font-weight: 700; color: #f8fafc; margin-bottom: 8px; }
-  .hero h1 span { color: #38bdf8; }
-  .hero .subtitle { font-size: 1.1rem; color: #94a3b8; max-width: 600px; margin: 0 auto; }
-  .badge { display: inline-block; background: #164e63; color: #67e8f9; padding: 4px 12px; border-radius: 9999px; font-size: 0.8rem; font-weight: 600; margin-bottom: 16px; }
-  .container { max-width: 1000px; margin: 0 auto; padding: 40px 20px; }
-  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 40px; }
-  @media (max-width: 768px) { .grid { grid-template-columns: 1fr; } }
-  .card { background: #1e293b; border: 1px solid #334155; border-radius: 12px; padding: 24px; transition: border-color 0.2s; }
-  .card:hover { border-color: #38bdf8; }
-  .card h3 { color: #f8fafc; font-size: 1.1rem; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
-  .card h3 .icon { font-size: 1.3rem; }
-  .card p, .card li { color: #94a3b8; font-size: 0.9rem; line-height: 1.6; }
-  .card ul { list-style: none; padding: 0; }
-  .card ul li { padding: 6px 0; border-bottom: 1px solid #334155; }
-  .card ul li:last-child { border-bottom: none; }
-  .card ul li code { background: #0f172a; color: #38bdf8; padding: 2px 6px; border-radius: 4px; font-size: 0.85rem; }
-  .results-table { width: 100%; border-collapse: collapse; margin-top: 12px; }
-  .results-table th, .results-table td { padding: 10px 12px; text-align: left; border-bottom: 1px solid #334155; font-size: 0.85rem; }
-  .results-table th { color: #38bdf8; font-weight: 600; }
-  .results-table td { color: #cbd5e1; }
-  .results-table tr:hover td { background: #1a2744; }
-  .highlight { color: #4ade80; font-weight: 600; }
-  .section-title { font-size: 1.4rem; color: #f8fafc; margin-bottom: 20px; font-weight: 600; }
-  .demo-box { background: #1e293b; border: 1px solid #334155; border-radius: 12px; padding: 24px; margin-bottom: 40px; }
-  .demo-box h3 { color: #f8fafc; margin-bottom: 16px; }
-  .demo-form { display: flex; gap: 12px; flex-wrap: wrap; align-items: flex-end; }
-  .demo-form label { color: #94a3b8; font-size: 0.85rem; display: block; margin-bottom: 4px; }
-  .demo-form select, .demo-form input, .demo-form button { background: #0f172a; border: 1px solid #475569; color: #e2e8f0; padding: 8px 12px; border-radius: 6px; font-size: 0.9rem; }
-  .demo-form button { background: #0ea5e9; border: none; color: white; font-weight: 600; cursor: pointer; padding: 8px 20px; }
-  .demo-form button:hover { background: #0284c7; }
-  .cmd-input { flex: 1; min-width: 200px; }
-  #output { background: #0f172a; border: 1px solid #334155; border-radius: 8px; padding: 16px; margin-top: 16px; font-family: 'Cascadia Code', 'Fira Code', monospace; font-size: 0.8rem; color: #67e8f9; white-space: pre-wrap; max-height: 400px; overflow-y: auto; display: none; }
-  .links { display: flex; gap: 16px; justify-content: center; margin-top: 24px; flex-wrap: wrap; }
-  .links a { display: inline-flex; align-items: center; gap: 6px; background: #1e293b; border: 1px solid #334155; color: #e2e8f0; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-size: 0.9rem; font-weight: 500; transition: all 0.2s; }
-  .links a:hover { border-color: #38bdf8; color: #38bdf8; }
-  .stats { display: flex; gap: 32px; justify-content: center; margin: 32px 0; flex-wrap: wrap; }
-  .stat { text-align: center; }
-  .stat .num { font-size: 2rem; font-weight: 700; color: #38bdf8; }
-  .stat .label { font-size: 0.8rem; color: #64748b; margin-top: 4px; }
+  body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; background: #0a0e1a; color: #c9d1d9; min-height: 100vh; }
+  .header { background: #0d1117; border-bottom: 1px solid #21262d; padding: 48px 20px 36px; }
+  .header-inner { max-width: 960px; margin: 0 auto; }
+  .tag { display: inline-block; background: #1c2333; color: #7ee787; border: 1px solid #238636; padding: 3px 10px; border-radius: 4px; font-size: 0.75rem; font-weight: 600; letter-spacing: 0.5px; text-transform: uppercase; margin-bottom: 14px; }
+  .header h1 { font-size: 2rem; font-weight: 600; color: #f0f6fc; margin-bottom: 6px; letter-spacing: -0.5px; }
+  .header p { font-size: 1rem; color: #8b949e; max-width: 640px; line-height: 1.5; }
+  .nav-links { display: flex; gap: 12px; margin-top: 20px; flex-wrap: wrap; }
+  .nav-links a { color: #8b949e; background: #161b22; border: 1px solid #30363d; padding: 7px 16px; border-radius: 6px; text-decoration: none; font-size: 0.82rem; font-weight: 500; transition: all 0.15s; }
+  .nav-links a:hover { color: #f0f6fc; border-color: #58a6ff; }
+  .metrics-bar { display: flex; gap: 1px; background: #21262d; border-bottom: 1px solid #21262d; }
+  .metric { flex: 1; text-align: center; padding: 20px 12px; background: #0d1117; }
+  .metric .val { font-size: 1.6rem; font-weight: 700; color: #f0f6fc; font-variant-numeric: tabular-nums; }
+  .metric .lbl { font-size: 0.7rem; color: #8b949e; text-transform: uppercase; letter-spacing: 0.8px; margin-top: 4px; }
+  .main { max-width: 960px; margin: 0 auto; padding: 32px 20px; }
+  .section { margin-bottom: 32px; }
+  .section-header { font-size: 0.8rem; font-weight: 600; color: #8b949e; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 14px; padding-bottom: 8px; border-bottom: 1px solid #21262d; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 700px) { .grid-2 { grid-template-columns: 1fr; } .metrics-bar { flex-wrap: wrap; } .metric { min-width: 50%; } }
+  .panel { background: #0d1117; border: 1px solid #21262d; border-radius: 8px; overflow: hidden; }
+  .panel-head { background: #161b22; padding: 10px 16px; border-bottom: 1px solid #21262d; font-size: 0.82rem; font-weight: 600; color: #f0f6fc; }
+  .panel-body { padding: 16px; }
+  .tbl { width: 100%; border-collapse: collapse; }
+  .tbl th, .tbl td { padding: 8px 12px; text-align: left; font-size: 0.82rem; border-bottom: 1px solid #21262d; }
+  .tbl th { color: #8b949e; font-weight: 600; }
+  .tbl td { color: #c9d1d9; }
+  .tbl tr:last-child td { border-bottom: none; }
+  .tbl .good { color: #7ee787; font-weight: 600; }
+  .item-list { list-style: none; padding: 0; }
+  .item-list li { padding: 8px 0; border-bottom: 1px solid #21262d; font-size: 0.82rem; color: #c9d1d9; }
+  .item-list li:last-child { border-bottom: none; }
+  .item-list li strong { color: #f0f6fc; }
+  .item-list code { background: #161b22; color: #79c0ff; padding: 2px 6px; border-radius: 3px; font-size: 0.78rem; }
+  .demo-section { background: #0d1117; border: 1px solid #21262d; border-radius: 8px; overflow: hidden; margin-bottom: 32px; }
+  .demo-head { background: #161b22; padding: 10px 16px; border-bottom: 1px solid #21262d; font-size: 0.82rem; font-weight: 600; color: #f0f6fc; }
+  .demo-body { padding: 16px; }
+  .demo-controls { display: flex; gap: 10px; flex-wrap: wrap; align-items: flex-end; }
+  .form-group { display: flex; flex-direction: column; gap: 4px; }
+  .form-group label { font-size: 0.72rem; color: #8b949e; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; }
+  .form-group select, .form-group input { background: #0a0e1a; border: 1px solid #30363d; color: #c9d1d9; padding: 7px 10px; border-radius: 4px; font-size: 0.82rem; font-family: inherit; }
+  .form-group input:focus { outline: none; border-color: #58a6ff; }
+  .cmd-field { flex: 1; min-width: 180px; }
+  .btn { border: none; padding: 7px 16px; border-radius: 4px; font-size: 0.82rem; font-weight: 600; cursor: pointer; font-family: inherit; transition: background 0.15s; }
+  .btn-primary { background: #238636; color: #fff; }
+  .btn-primary:hover { background: #2ea043; }
+  .btn-secondary { background: #21262d; color: #c9d1d9; border: 1px solid #30363d; }
+  .btn-secondary:hover { background: #30363d; }
+  .btn-run { background: #1f6feb; color: #fff; }
+  .btn-run:hover { background: #388bfd; }
+  #output { background: #0a0e1a; border: 1px solid #21262d; border-radius: 4px; padding: 14px; margin-top: 14px; font-family: 'Cascadia Code', 'SF Mono', 'Fira Code', monospace; font-size: 0.78rem; color: #79c0ff; white-space: pre-wrap; max-height: 360px; overflow-y: auto; display: none; line-height: 1.5; }
+  .footer { text-align: center; padding: 24px 20px; color: #484f58; font-size: 0.75rem; border-top: 1px solid #21262d; margin-top: 20px; }
 </style>
 </head>
 <body>
-<div class="hero">
-  <div class="badge">OpenEnv Hackathon 2026</div>
-  <h1><span>LivePatch</span> Environment</h1>
-  <p class="subtitle">Train RL agents to diagnose and fix PostgreSQL database incidents under live production traffic</p>
-  <div class="stats">
-    <div class="stat"><div class="num">3</div><div class="label">Fault Types</div></div>
-    <div class="stat"><div class="num">15</div><div class="label">Step Budget</div></div>
-    <div class="stat"><div class="num">1.5B</div><div class="label">Model Params</div></div>
-    <div class="stat"><div class="num">0.67</div><div class="label">Best Score</div></div>
-  </div>
-  <div class="links">
-    <a href="https://github.com/rupeshreddy007/livepatch-env">GitHub</a>
-    <a href="https://huggingface.co/spaces/rupeshreddy7/livepatch-env/blob/main/BLOG.md">Blog Post</a>
-    <a href="https://huggingface.co/spaces/rupeshreddy7/livepatch-env/blob/main/training/livepatch_grpo_training.ipynb">Training Notebook</a>
-    <a href="https://huggingface.co/spaces/rupeshreddy7/livepatch-training">Training Dashboard</a>
+<div class="header">
+  <div class="header-inner">
+    <div class="tag">OpenEnv Hackathon 2026</div>
+    <h1>LivePatch</h1>
+    <p>A reinforcement learning environment for training agents to diagnose and remediate PostgreSQL database incidents under simulated production traffic.</p>
+    <div class="nav-links">
+      <a href="https://github.com/rupeshreddy007/livepatch-env">Source Code</a>
+      <a href="https://huggingface.co/spaces/rupeshreddy7/livepatch-env/blob/main/BLOG.md">Technical Writeup</a>
+      <a href="https://huggingface.co/spaces/rupeshreddy7/livepatch-env/blob/main/training/livepatch_grpo_training.ipynb">Training Notebook</a>
+      <a href="https://huggingface.co/spaces/rupeshreddy7/livepatch-training">Training Dashboard</a>
+    </div>
   </div>
 </div>
 
-<div class="container">
-  <div class="demo-box">
-    <h3>Try It Live</h3>
-    <div class="demo-form">
-      <div>
-        <label>Difficulty</label>
-        <select id="difficulty">
-          <option value="easy">Easy</option>
-          <option value="medium" selected>Medium</option>
-          <option value="hard">Hard</option>
-        </select>
-      </div>
-      <div>
-        <label>&nbsp;</label>
-        <button onclick="resetEnv()">Reset Environment</button>
-      </div>
-      <div class="cmd-input">
-        <label>SQL Command</label>
-        <input type="text" id="command" placeholder="e.g. EXPLAIN ANALYZE SELECT * FROM orders;" onkeydown="if(event.key==='Enter')sendCmd()">
-      </div>
-      <div>
-        <label>&nbsp;</label>
-        <button onclick="sendCmd()">Execute</button>
-      </div>
-      <div>
-        <label>&nbsp;</label>
-        <button onclick="submitEp()" style="background:#059669;">Submit</button>
-      </div>
-    </div>
-    <div id="output"></div>
-  </div>
+<div class="metrics-bar">
+  <div class="metric"><div class="val">3</div><div class="lbl">Fault Types</div></div>
+  <div class="metric"><div class="val">15</div><div class="lbl">Step Budget</div></div>
+  <div class="metric"><div class="val">1.5B</div><div class="lbl">Parameters</div></div>
+  <div class="metric"><div class="val">0.673</div><div class="lbl">Best Score</div></div>
+  <div class="metric"><div class="val">22</div><div class="lbl">Episodes</div></div>
+</div>
 
-  <h2 class="section-title">Training Results</h2>
-  <div class="grid">
-    <div class="card">
-      <h3><span class="icon">&#x1f4ca;</span> Best Episode (Ep 19)</h3>
-      <table class="results-table">
-        <tr><th>Metric</th><th>Score</th></tr>
-        <tr><td>Overall Score</td><td class="highlight">0.673</td></tr>
-        <tr><td>Fix Quality</td><td>0.421</td></tr>
-        <tr><td>Uptime</td><td>0.721</td></tr>
-        <tr><td>Safety</td><td>1.000</td></tr>
-      </table>
-    </div>
-    <div class="card">
-      <h3><span class="icon">&#x1f3af;</span> Key Milestones</h3>
-      <ul>
-        <li><b>Ep 0:</b> First valid SQL generated</li>
-        <li><b>Ep 17:</b> First fault resolved (missing_index)</li>
-        <li><b>Ep 19:</b> Best score achieved (0.673)</li>
-        <li><b>Ep 5:</b> Safety score reached 1.0</li>
-      </ul>
+<div class="main">
+  <div class="demo-section">
+    <div class="demo-head">Interactive Console</div>
+    <div class="demo-body">
+      <div class="demo-controls">
+        <div class="form-group">
+          <label>Difficulty</label>
+          <select id="difficulty">
+            <option value="easy">Easy</option>
+            <option value="medium" selected>Medium</option>
+            <option value="hard">Hard</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>&nbsp;</label>
+          <button class="btn btn-secondary" onclick="resetEnv()">Initialize</button>
+        </div>
+        <div class="form-group cmd-field">
+          <label>Command</label>
+          <input type="text" id="command" placeholder="SELECT * FROM pg_stat_activity;" onkeydown="if(event.key==='Enter')sendCmd()">
+        </div>
+        <div class="form-group">
+          <label>&nbsp;</label>
+          <button class="btn btn-run" onclick="sendCmd()">Execute</button>
+        </div>
+        <div class="form-group">
+          <label>&nbsp;</label>
+          <button class="btn btn-primary" onclick="submitEp()">Submit</button>
+        </div>
+      </div>
+      <div id="output"></div>
     </div>
   </div>
 
-  <div class="grid">
-    <div class="card">
-      <h3><span class="icon">&#x2699;</span> API Endpoints</h3>
-      <ul>
-        <li><code>POST /reset</code> Reset with new fault scenario</li>
-        <li><code>POST /step</code> Execute SQL command</li>
-        <li><code>GET /state</code> Current environment state</li>
-        <li><code>GET /grade</code> Grade current episode</li>
-        <li><code>GET /health</code> Health check</li>
-      </ul>
-    </div>
-    <div class="card">
-      <h3><span class="icon">&#x1f6e0;</span> Fault Types</h3>
-      <ul>
-        <li><b>Missing Index</b> &mdash; CREATE INDEX CONCURRENTLY</li>
-        <li><b>Table Bloat</b> &mdash; VACUUM ANALYZE</li>
-        <li><b>Stale Statistics</b> &mdash; ANALYZE tablename</li>
-      </ul>
+  <div class="section">
+    <div class="section-header">Training Results</div>
+    <div class="grid-2">
+      <div class="panel">
+        <div class="panel-head">Best Performance (Episode 19)</div>
+        <div class="panel-body">
+          <table class="tbl">
+            <tr><th>Metric</th><th>Value</th></tr>
+            <tr><td>Overall Score</td><td class="good">0.673</td></tr>
+            <tr><td>Fix Quality</td><td>0.421</td></tr>
+            <tr><td>Uptime</td><td>0.721</td></tr>
+            <tr><td>Safety</td><td class="good">1.000</td></tr>
+          </table>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-head">Training Milestones</div>
+        <div class="panel-body">
+          <ul class="item-list">
+            <li><strong>Episode 0</strong> -- First valid SQL command generated</li>
+            <li><strong>Episode 5</strong> -- Safety score reached 1.0</li>
+            <li><strong>Episode 17</strong> -- First fault resolved (missing_index)</li>
+            <li><strong>Episode 19</strong> -- Peak score: 0.673</li>
+          </ul>
+        </div>
+      </div>
     </div>
   </div>
 
-  <h2 class="section-title">Training Configuration</h2>
-  <div class="card" style="margin-bottom:40px;">
-    <table class="results-table">
-      <tr><th>Parameter</th><th>Value</th></tr>
-      <tr><td>Model</td><td>Qwen2.5-1.5B-Instruct</td></tr>
-      <tr><td>Method</td><td>SFT (3 epochs) + GRPO (50 episodes)</td></tr>
-      <tr><td>LoRA</td><td>r=32, 36.9M trainable params</td></tr>
-      <tr><td>Quantization</td><td>4-bit (Unsloth)</td></tr>
-      <tr><td>Group Size</td><td>8 (same-seed comparison)</td></tr>
-      <tr><td>GPU</td><td>NVIDIA A100-SXM4-80GB</td></tr>
-      <tr><td>Episode Time</td><td>~80 seconds</td></tr>
-    </table>
+  <div class="section">
+    <div class="section-header">Environment Specification</div>
+    <div class="grid-2">
+      <div class="panel">
+        <div class="panel-head">REST API</div>
+        <div class="panel-body">
+          <ul class="item-list">
+            <li><code>POST /reset</code> -- Initialize new incident scenario</li>
+            <li><code>POST /step</code> -- Execute SQL command</li>
+            <li><code>GET /state</code> -- Retrieve current state</li>
+            <li><code>GET /grade</code> -- Evaluate episode performance</li>
+            <li><code>GET /health</code> -- Service health check</li>
+          </ul>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-head">Supported Faults</div>
+        <div class="panel-body">
+          <ul class="item-list">
+            <li><strong>Missing Index</strong> -- Resolve with CREATE INDEX CONCURRENTLY</li>
+            <li><strong>Table Bloat</strong> -- Resolve with VACUUM ANALYZE</li>
+            <li><strong>Stale Statistics</strong> -- Resolve with ANALYZE</li>
+          </ul>
+        </div>
+      </div>
+    </div>
   </div>
+
+  <div class="section">
+    <div class="section-header">Training Configuration</div>
+    <div class="panel">
+      <div class="panel-body">
+        <table class="tbl">
+          <tr><th>Parameter</th><th>Value</th></tr>
+          <tr><td>Base Model</td><td>Qwen2.5-1.5B-Instruct</td></tr>
+          <tr><td>Training Method</td><td>SFT (3 epochs, 51 demos) + GRPO (50 episodes)</td></tr>
+          <tr><td>Adaptation</td><td>LoRA r=32, 36.9M trainable parameters</td></tr>
+          <tr><td>Quantization</td><td>4-bit via Unsloth</td></tr>
+          <tr><td>GRPO Group Size</td><td>8 (same-seed comparison)</td></tr>
+          <tr><td>Hardware</td><td>NVIDIA A100-SXM4-80GB</td></tr>
+          <tr><td>Episode Duration</td><td>~80 seconds</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="footer">
+  LivePatch -- Built for the OpenEnv Hackathon by rupeshreddy7
 </div>
 
 <script>
