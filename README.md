@@ -127,6 +127,7 @@ Trained **Qwen2.5-1.5B-Instruct** with GRPO on A100 GPU using Unsloth + QLoRA (4
 - **HuggingFace Space (Training):** [https://huggingface.co/spaces/rupeshreddy7/livepatch-training](https://huggingface.co/spaces/rupeshreddy7/livepatch-training)
 - **GitHub Repository:** [https://github.com/rupeshreddy007/livepatch-env](https://github.com/rupeshreddy007/livepatch-env)
 - **Training Script:** [train.py](https://huggingface.co/spaces/rupeshreddy7/livepatch-training/blob/main/train.py)
+- **Blog Post:** [BLOG.md](BLOG.md)
 
 ![Training Curves](training/training_curves.png)
 
