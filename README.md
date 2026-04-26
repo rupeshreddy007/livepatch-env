@@ -98,9 +98,12 @@ Episodes are graded on 4 axes (weighted sum = final score):
 Trained **Qwen2.5-1.5B-Instruct** with GRPO on A100 GPU using Unsloth + QLoRA (4-bit, r=32).
 
 **Configuration:**
-- 50 episodes, GROUP_SIZE=6, LR=1e-4, batched inference
-- Adversarial curriculum: easy (0-19) → medium (20-34) → hard (35-49)
+- 50 episodes, GROUP_SIZE=8, LR=5e-5, batched inference
+- SFT pre-training on expert demonstrations (3 epochs, 51 samples)
+- GRPO with same-seed comparison, train on all advantages
+- Adversarial curriculum: easy (0-24) -> medium (25-39) -> hard (40-49)
 - Anti-collapse detection with dynamic temperature scaling
+- Reward gating: SLA/efficiency/safety bonuses only awarded when faults are resolved
 - Trainable params: 36.9M (of 1.5B total)
 
 **Baselines vs Trained Agent (easy difficulty):**
@@ -112,10 +115,18 @@ Trained **Qwen2.5-1.5B-Instruct** with GRPO on A100 GPU using Unsloth + QLoRA (4
 | **GRPO (best ep)** | **0.63** | **0.54** | **0.71** | **1.00** |
 
 **Key findings:**
-1. **Safety learned first** — safety score reached 1.0 within 5 episodes. The model learned `CREATE INDEX CONCURRENTLY` over `CREATE INDEX`, and `VACUUM ANALYZE` over `VACUUM FULL`.
-2. **Fix quality is the frontier** — the model achieved fix=0.54 (ep 13) by learning to diagnose with `EXPLAIN ANALYZE` before applying fixes. However, this capability is unstable and collapses to safe-but-passive policies.
-3. **Batched inference 6x speedup** — running GROUP_SIZE=6 episodes in parallel via batched generation reduced episode time from ~400s to ~50s on A100.
-4. **Reward signal insight** — diagnostic commands (\\dt, EXPLAIN) receive zero per-step reward, creating a sparse reward problem. Future work should add shaping rewards for exploration.
+1. **Safety learned first** -- safety score reached 1.0 within 5 episodes. The model learned `CREATE INDEX CONCURRENTLY` over `CREATE INDEX`, and `VACUUM ANALYZE` over `VACUUM FULL`.
+2. **Fix quality is the frontier** -- the model achieved fix=0.54 (ep 13) by learning to diagnose with `EXPLAIN ANALYZE` before applying fixes. However, this capability is unstable and collapses to safe-but-passive policies.
+3. **Batched inference 6x speedup** -- running GROUP_SIZE=8 episodes in parallel via batched generation reduced episode time from ~400s to ~50s on A100.
+4. **GRPO design matters** -- same seed for all group members (comparing strategies, not luck), training on all advantages (not just positive), and gating bonuses on actual fixes were critical for meaningful gradient signal.
+5. **SFT bootstrapping** -- pre-training on expert demonstrations (3 epochs) gives the model the right command vocabulary before GRPO refines strategy.
+
+## Links
+
+- **HuggingFace Space (Environment):** [https://huggingface.co/spaces/rupeshreddy7/livepatch-env](https://huggingface.co/spaces/rupeshreddy7/livepatch-env)
+- **HuggingFace Space (Training):** [https://huggingface.co/spaces/rupeshreddy7/livepatch-training](https://huggingface.co/spaces/rupeshreddy7/livepatch-training)
+- **GitHub Repository:** [https://github.com/rupeshreddy007/livepatch-env](https://github.com/rupeshreddy007/livepatch-env)
+- **Training Script:** [train.py](https://huggingface.co/spaces/rupeshreddy7/livepatch-training/blob/main/train.py)
 
 ![Training Curves](training/training_curves.png)
 
