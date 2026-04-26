@@ -60,5 +60,27 @@ def health():
     return jsonify({"status": "ok"})
 
 
+@app.route("/", methods=["GET"])
+def index():
+    return """<html><head><title>LivePatch Environment</title></head>
+<body style="font-family:sans-serif;max-width:800px;margin:40px auto;padding:20px;">
+<h1>LivePatch - PostgreSQL Incident Response Environment</h1>
+<p>An OpenEnv-compatible environment for training RL agents to diagnose and fix PostgreSQL database incidents.</p>
+<h2>API Endpoints</h2>
+<ul>
+<li><b>POST /reset</b> - Reset environment with new fault scenario</li>
+<li><b>POST /step</b> - Execute a command (JSON body: {"command": "SQL..."})</li>
+<li><b>GET /state</b> - Get current environment state</li>
+<li><b>GET /grade</b> - Grade the current episode</li>
+<li><b>GET /health</b> - Health check</li>
+</ul>
+<h2>Links</h2>
+<ul>
+<li><a href="https://github.com/rupeshreddy007/livepatch-env">GitHub Repository</a></li>
+<li><a href="https://huggingface.co/spaces/rupeshreddy7/livepatch-training">Training Dashboard</a></li>
+</ul>
+</body></html>"""
+
+
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=7860, debug=True)
