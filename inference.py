@@ -24,9 +24,9 @@ def run_inference():
     """Run inference with an LLM agent against the environment."""
     from openai import OpenAI
 
-    api_key = os.environ.get("API_KEY", os.environ.get("OPENAI_API_KEY", ""))
+    api_key = os.environ.get("HF_TOKEN", os.environ.get("API_KEY", os.environ.get("OPENAI_API_KEY", "")))
     base_url = os.environ.get("API_BASE_URL", "https://api.openai.com/v1")
-    model_name = os.environ.get("MODEL_NAME", "gpt-4o-mini")
+    model_name = os.environ.get("MODEL_NAME", "Qwen/Qwen2.5-72B-Instruct")
 
     client = OpenAI(api_key=api_key, base_url=base_url)
 

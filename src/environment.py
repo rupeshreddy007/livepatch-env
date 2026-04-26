@@ -296,9 +296,9 @@ class LivePatchEnv:
             f"Faults resolved:  {len(resolved)}/{len(self.faults)}",
         ]
         for f in resolved:
-            lines.append(f"  ✅ {f.fault_type} on '{f.target_table}'")
+            lines.append(f"  [FIXED] {f.fault_type} on '{f.target_table}'")
         for f in unresolved:
-            lines.append(f"  ❌ {f.fault_type} on '{f.target_table}' — UNRESOLVED")
+            lines.append(f"  [OPEN] {f.fault_type} on '{f.target_table}' - UNRESOLVED")
         lines.extend([
             f"\nCost improvement: {snapshot.total_explain_cost:.0f} (was {self.initial_snapshot.total_explain_cost:.0f})",
             f"Final p99 latency: {final_traffic.p99_latency_ms:.1f}ms (SLA: {self.config.sla_latency_ms:.0f}ms)",

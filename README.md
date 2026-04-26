@@ -1,3 +1,20 @@
+---
+title: LivePatch Environment
+emoji: 🔧
+colorFrom: blue
+colorTo: green
+sdk: docker
+app_port: 7860
+pinned: false
+license: mit
+tags:
+  - openenv
+  - reinforcement-learning
+  - postgresql
+  - database
+  - incident-response
+---
+
 # LivePatch: Database Incident Response Under Live Traffic
 
 An RL environment where an agent must diagnose and fix PostgreSQL database incidents — while production traffic keeps flowing. One wrong move and requests start failing.
@@ -78,9 +95,27 @@ Episodes are graded on 4 axes (weighted sum = final score):
 
 ## Training Results
 
-Trained Qwen2.5-1.5B-Instruct with GRPO (30 episodes, curriculum: easy → medium → hard).
+Trained **Qwen2.5-1.5B-Instruct** with GRPO on A100 GPU using Unsloth + QLoRA (4-bit, r=32).
 
-**Key finding:** The agent learned safety first. The safety score went from 0 → 1.0 within 10 episodes — the model learned to always use `CONCURRENTLY` and `VACUUM ANALYZE` instead of their unsafe variants. Fix quality requires more training budget (multi-step diagnosis is harder than learning "don't break things").
+**Configuration:**
+- 50 episodes, GROUP_SIZE=6, LR=1e-4, batched inference
+- Adversarial curriculum: easy (0-19) → medium (20-34) → hard (35-49)
+- Anti-collapse detection with dynamic temperature scaling
+- Trainable params: 36.9M (of 1.5B total)
+
+**Baselines vs Trained Agent (easy difficulty):**
+
+| Agent | Score | Fix Quality | Uptime | Safety |
+|-------|-------|------------|--------|--------|
+| Random | 0.60 | 0.00 | 0.66 | 0.50 |
+| Heuristic | 0.65 | 0.00 | 0.78 | 1.00 |
+| **GRPO (best ep)** | **0.63** | **0.54** | **0.71** | **1.00** |
+
+**Key findings:**
+1. **Safety learned first** — safety score reached 1.0 within 5 episodes. The model learned `CREATE INDEX CONCURRENTLY` over `CREATE INDEX`, and `VACUUM ANALYZE` over `VACUUM FULL`.
+2. **Fix quality is the frontier** — the model achieved fix=0.54 (ep 13) by learning to diagnose with `EXPLAIN ANALYZE` before applying fixes. However, this capability is unstable and collapses to safe-but-passive policies.
+3. **Batched inference 6x speedup** — running GROUP_SIZE=6 episodes in parallel via batched generation reduced episode time from ~400s to ~50s on A100.
+4. **Reward signal insight** — diagnostic commands (\\dt, EXPLAIN) receive zero per-step reward, creating a sparse reward problem. Future work should add shaping rewards for exploration.
 
 ![Training Curves](training/training_curves.png)
 
