@@ -1,5 +1,7 @@
 import json
 import numpy as np
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 from pathlib import Path
 
@@ -105,6 +107,7 @@ ax.grid(True, alpha=0.3)
 
 plt.tight_layout()
 fig.savefig(base / "training_curves.png", dpi=150, bbox_inches="tight")
+plt.close(fig)
 print(f"Saved training_curves.png (First: {len(run1)} ep, Latest: {len(run2)} ep)")
 
 # --- Figure 2: Summary bar chart ---
@@ -144,6 +147,7 @@ ax2.grid(True, alpha=0.3, axis="y")
 
 plt.tight_layout()
 fig2.savefig(base / "training_dashboard.png", dpi=150, bbox_inches="tight")
+plt.close(fig2)
 print("Saved training_dashboard.png")
 
 # --- Standalone reward curves per run (like K8s SRE style) ---

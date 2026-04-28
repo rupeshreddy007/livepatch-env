@@ -9,7 +9,4 @@ build/
 venv/
 livepatch-qwen-1.5b-lora/
 livepatch-checkpoint-*/
-training_curves.png
-agent_comparison.png
-training_log.json
 training/nb_part1.txt
