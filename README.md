@@ -161,6 +161,10 @@ All bonuses (SLA, safety, efficiency) are gated on `resolved_faults > 0` to prev
 
 ![Training Curves](training/training_curves.png)
 
+| First Run | Latest Run |
+|-----------|------------|
+| ![First Run](training/training_reward_first.png) | ![Latest Run](training/training_reward_latest.png) |
+
 ### Limitations
 
 - The 1.5B model frequently generates malformed output (observation fragments, step counters) instead of valid SQL. A larger model (7B+) or constrained decoding would likely improve command reliability.
